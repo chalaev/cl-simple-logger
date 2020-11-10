@@ -1,0 +1,230 @@
+#+TITLE: simple logging system for a lisp server
+#+AUTHOR: Oleg Shalaev
+#+EMAIL:  oleg@chalaev.com
+#+LaTeX_HEADER: \usepackage[russian,english]{babel}
+#+LATEX_HEADER: \usepackage[letterpaper,hmargin={1.5cm,1.5cm},vmargin={1.3cm,2cm},nohead,nofoot]{geometry}
+
+* Main code
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(defpackage :simple-log
+  (:shadow cl:warning cl:debug cl:log)
+  (:nicknames "SL")
+  (:use :cl)
+  (:export :log :out-streams :level :start :stop :debug :info :warning :err))
+(in-package :simple-log)
+(eval-when (:compile-toplevel :execute)
+  (load "goodies/macros.lisp"))
+#+END_SRC
+
+** Variables
+Let us assign a number to every message type:
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(defvar log-types (list 'debug 'info 'warning 'err))
+(loop for field-name in log-types for i from 0 do (set field-name i))
+(defvar *maxLogLevel* (1- (length log-types)))
+(defvar level 0 "default (minimal) value")
+#+END_SRC
+←  the least informative level is 3 (only error messages), and the most informative one is 0 (everything is logged).
+
+[Obsolete note: In the past there was an exported variable SO (="standard output") probably connected with =out-streams=.]
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(defvar out-streams nil "list of auxillary streams for extra log copies")
+(defvar dir nil "directory where log files will be stored")
+(defvar log-file nil "log file name, required before we load the package")
+(defvar *start-time* nil "needed to figure out the timing")
+(defvar *queue-lock* (bt:make-lock) "we need locks when running on multi-threading systems")
+(defvar *tobe-printed* nil "log buffer")
+#+END_SRC
+where =*tobe-printed*= accumulates log messages.
+
+These will be appended to a log file every second by the timer
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(defvar *print-timer* nil "needed for flushing the log every second")
+#+END_SRC
+
+** Secondary functions
+Every log message will be printed with =timer= using =format-msg=:
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(defun format-msg (stream msg)
+(let ((dt (- (second msg) (cdr *start-time*))))
+  (multiple-value-bind (s fractions) (floor (+ (car *start-time*) dt) internal-time-units-per-second)
+    (let ((ms (floor fractions (floor internal-time-units-per-second 1000))))
+    (multiple-value-bind (s mi h d mo) (decode-universal-time s)
+(loop for str in (cons stream out-streams) do
+#+END_SRC
+where =internal-time-units-per-second= was 1000 for older ~sbcl~ versions, but for 2.0.10 it is 1000000.
+
+=message= will contain both format string and args:
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(let ((message (third msg)))
+  (apply #'format (append (list str
+#+END_SRC
+
+Using powerful (in CL) ~format~ abilities fot time output:
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(concatenate 'string 
+"~&~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d.~3,'0d ~a " (car message))
+#+END_SRC
+    11   /   09   20   :  07  :  02  .  348  ← time format under microscope
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+mo  d  h mi s ms
+(nth (first msg) log-types)); e.g., INFO
+(cdr message))))
+(format str "~%")))))))
+#+END_SRC
+
+=printer= is called by =print-timer= every second:
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(defun printer()
+"flushes the log buffer"
+(when *tobe-printed* (bt:with-lock-held (*queue-lock*)
+(with-open-file (s log-file :direction :output :if-exists :append)
+  (mapcar #'(lambda(msg) (format-msg s msg)) (reverse *tobe-printed*))
+  (setf *tobe-printed* nil)))))
+#+END_SRC
+
+** Main functions
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(defun log (livello &rest message)
+"main log function"
+#+END_SRC
+
+If we forgot to =start= the log system beforehand, we do it when the first message is logged:
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(ifn (start) (format t "could not start the logging system")
+#+END_SRC
+
+Queue the message:
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(bt:with-lock-held (*queue-lock*)
+  (when (<= level livello)
+    (push (list livello (get-internal-real-time) message) *tobe-printed*)))))
+#+END_SRC
+
+It is better, though, to =(start)= not from the =log= function; in this case we can provide arguments: log directory and file name
+(Should I merge them both into file name?)
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(defun start(&optional dir FN)
+  (iff *print-timer* t
+    (setf dir (if (stringp dir) dir "/var/log/sbcl/")
+          log-file (merge-pathnames
+                    (if (stringp FN) FN "server.log")
+                    dir))
+    (ifn (directory dir)
+	 (format t "refuse to start because ~a does not exist, please create it~%" dir)
+#+END_SRC
+← file-err is a standard condition.
+(Is there function similar to elisp'es =file-name-as-directory= in CL?)
+
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+  (setf *start-time* (cons (* internal-time-units-per-second (get-universal-time)) (get-internal-real-time))
+        *print-timer* (sb-ext:make-timer #'printer :thread t))
+  (sb-ext:schedule-timer *print-timer* 1 :repeat-interval 1) t)))
+#+END_SRC
+← once per second.
+
+=(stop)= flushes the remaining messages into the log file:
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(defun stop()
+(when (and *print-timer* (sb-ext:timer-scheduled-p *print-timer*))
+  (sb-ext:unschedule-timer *print-timer*))
+  (setf *print-timer* nil)
+  (printer))
+#+END_SRC
+It is recommended to =(stop)= before quitting the code just to be sure that no log messages are lost.
+
+* Example
+Somehow the effect of =(declaim (optimize (speed 3) (safety 0)))= here is infinitesimal, should I write it somewhere else? →
+#+BEGIN_SRC lisp :tangle generated/example.lisp
+(declaim (optimize (speed 3) (safety 0)))
+(defpackage :simple-log/example
+  (:shadow cl:warning cl:debug cl:log)
+  (:export :main)
+  (:use :cl :simple-log))
+(in-package :simple-log/example)
+#+END_SRC
+← it is remarkable that =:shadow= must be mentioned in =defpackage= for both ~:simple-log~ and ~:simple-log/example~ packages.
+
+In order to distinguish messages comming from different sources (for example, different services running on the lisp server)
+let us define different log functions (=log-SLU= and =log-SLD= in this example), each adding its unique prefix to every log message:
+#+BEGIN_SRC lisp :tangle generated/example.lisp
+(defun log-SLU (type &rest message)
+  (apply #'SL:log
+    (cons type (cons (concatenate 'string "SLU " (car message)) (cdr message)))))
+(defun log-SLD (type &rest message)
+  (apply #'SL:log
+    (cons type (cons (concatenate 'string "SLD " (car message)) (cdr message)))))
+#+END_SRC
+
+=(main)= will be automatically evaluated when launching =example.bin=, but in interpreting mode it should be called manually, see the ~Makefile~:
+#+BEGIN_SRC lisp :tangle generated/example.lisp
+(defun main()
+  (setf simple-log:out-streams (list *standard-output*))
+#+END_SRC
+(Note: in the past there was =SO= variable probably saving original =*standard-output*= before it was updated by the multithreading machinery.)
+← Log messages are written both in terminal as well as into the log file (which is ~/var/log/sbcl/server.log~ by default).
+
+Finally we test the logging service:
+#+BEGIN_SRC lisp :tangle generated/example.lisp
+(log-SLU SL:warning "this is a warning from the log service #~d" 1)
+(log-SLD SL:info "this is the ~ath info from the log service #~d" 146 2)
+(sleep 2.345)
+(log-SLU SL:warning "this is a warning from the log service #~d" 3)
+(sleep 0.111)
+(log-SLD SL:info "this is the ~ath info from the log service #~d" 137 4)
+(SL:stop))
+#+END_SRC
+* Packaging
+** Main package
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+(asdf:defsystem "simple-log"
+  :description "minimalistic CL logger"
+#+END_SRC
+Long description should be loaded from ~description.org~:
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+  :long-description #.(uiop:read-file-string (uiop/pathname:subpathname *load-pathname* "description.org"))
+  :author "Oleg Shalaev"
+  :mailto "oleg@chalaev.com"
+  :licence "MIT"
+  :version "0.1"
+  :depends-on (:bordeaux-threads :local-time)
+  :components ((:file "simple-log")))
+#+END_SRC
+
+When =sbcl= is compiled with (disabled by default) =sb-core-compression= feature,
+one can significantly reduce the size of an executable using SBCL's core compression: 42 to 13MB  (for SBCL 2.0.10).
+(See global variable =*features*= to see if =sb-core-compression= is supported.)
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+#+sb-core-compression
+(defmethod asdf:perform ((o asdf:image-op) (c asdf:system))
+  (uiop:dump-image (asdf:output-file o c) :executable t :compression t))
+#+END_SRC
+
+(BTW, in the past there were two more symbols exported: =:start-all= and =:stop-all=,
+but as of 2020-11-08 I doubt if they should really be defined here.)
+
+** Example
+Declaring example package in the same (main) =.asd= file:
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+(asdf:defsystem "simple-log/example"
+:depends-on (:simple-log)
+#+END_SRC
+
+3 next lines serve to assist with building binary image:
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+:build-operation "program-op"
+:build-pathname "example.bin"
+:entry-point "simple-log/example:main"
+#+END_SRC
+where ~:build-pathname~ is relative to the package placement
+(for my ~quicklisp~, it would be =~/quicklisp/local-projects/simple-log/=).
+
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+:description "an example for simple-log"
+:author "Oleg Shalaev"
+:mailto "oleg@chalaev.com"
+:licence "MIT"
+:version "0"
+:components ((:file "example")))
+#+END_SRC
+
