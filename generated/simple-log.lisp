@@ -40,7 +40,7 @@ mo  d  h mi s ms
 (format str "~%")))))))
 
 (defun printer()
-"flushes log buffer, called by print-timer"
+"flushes the log buffer"
 (when *tobe-printed* (bt:with-lock-held (*queue-lock*)
 (with-open-file (s log-file :direction :output :if-exists :append)
   (mapcar #'(lambda(msg) (format-msg s msg)) (reverse *tobe-printed*))

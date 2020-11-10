@@ -8,7 +8,6 @@
 (defun log-SLU (type &rest message)
   (apply #'SL:log
     (cons type (cons (concatenate 'string "SLU " (car message)) (cdr message)))))
-
 (defun log-SLD (type &rest message)
   (apply #'SL:log
     (cons type (cons (concatenate 'string "SLD " (car message)) (cdr message)))))

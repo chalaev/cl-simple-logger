@@ -1,13 +1,12 @@
 (asdf:defsystem "simple-log"
-  :description "simple yet useful server log system"
+  :description "minimalistic CL logger"
 
 :long-description #.(uiop:read-file-string (uiop/pathname:subpathname *load-pathname* "description.org"))
-:author "Oleg Shalaev http://chalaev.com"
+:author "Oleg Shalaev"
 :mailto "oleg@chalaev.com"
 :licence "MIT"
 :version "0.1"
 :depends-on (:bordeaux-threads :local-time)
-:in-order-to ((test-op (test-op :simple-log/test)))
 :components ((:file "simple-log")))
 
 #+sb-core-compression
@@ -22,9 +21,8 @@
 :entry-point "simple-log/example:main"
 
 :description "an example for simple-log"
-:author "Oleg Shalaev http://chalaev.com"
+:author "Oleg Shalaev"
 :mailto "oleg@chalaev.com"
 :licence "MIT"
 :version "0"
-:serial t
 :components ((:file "example")))

@@ -21,17 +21,17 @@ chmod 770 /var/log/sbcl
 #+END_SRC
 where ~shalaev~ should be replaced with your user name.
 
-** either just use the provided code
+** Either just use the provided code
 If you do not want to go into the details,
 just copy the source code files from ~generated/~ to the directory where =(ql:quickload :simple-log)= command would find them,
 for example, =~/quicklisp/local-projects/simple-log/=
 
 Then just open and run ~quick-start.lisp~ to see how the log system works.
 
-** or update Makefile, then make
+** or update [[file:Makefile][Makefile]], then make
 If you changed the code, ~make~ will be useful for testing and compiling it.
 
-In ~Makefile~,
+In [[file:Makefile][Makefile]],
 1. set ~SBCL~ to the path of the ~sbcl~ binary, and
 2. set ~quicklispDir~ to the directory where locally created ~server-log~ package will be stored; then
 3. ~make~
@@ -43,7 +43,7 @@ The ~make~ command
 You can run the compiled binary from the ~generated/~ directory.
 
 ** Notes
-1. ~Makefile~ requires [[https://www.gnu.org/software/emacs/][emacs]] for generating the source code files in the ~generated/~ directory from ~simple-log.org~ with the =M-x org-babel-tangle= command.
+1. [[file:Makefile][Makefile]] requires [[https://www.gnu.org/software/emacs/][emacs]] for generating the source code files in the ~generated/~ directory from [[file:simple-log.org][simple-log.org]] with the =M-x org-babel-tangle= command.
 2. Unless you have manually compiled ~sbcl~ with =sh make.sh --with-sb-core-compression= command,
    your binary will be several times larger than 13mb.
 
