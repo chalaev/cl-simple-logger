@@ -1,16 +1,22 @@
+;; generated from .org
+(declaim (optimize (speed 3) (safety 0)))
 (defpackage :simple-log
-  (:shadow cl:warning cl:debug cl:log)
-  (:nicknames "SL")
-  (:use :cl)
-  (:export :log :out-streams :level :start :stop :debug :info :warning :err))
+(:shadow cl:warning cl:debug cl:log cl:error)
+(:nicknames "SL")
+(:use :cl)
+(:export :log :out-streams :level :start :stop :debug :info :warning :error))
 (in-package :simple-log)
-(eval-when (:compile-toplevel :execute)
-  (load "goodies/macros.lisp"))
+(eval-when (:compile-toplevel)
+  (loop for field-name in '(debug info warning error) for i from 0 do (defvar field-name i))
+  (let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
+    (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
+      '(#p"macros.lisp"))))
 
-(defvar log-types (list 'debug 'info 'warning 'err))
+(defvar log-types (list 'debug 'info 'warning 'error))
 (loop for field-name in log-types for i from 0 do (set field-name i))
 (defvar *maxLogLevel* (1- (length log-types)))
 (defvar level 0 "default (minimal) value")
+;;(declare (integer level))
 
 (defvar out-streams nil "list of auxillary streams for extra log copies")
 (defvar dir nil "directory where log files will be stored")
@@ -23,6 +29,7 @@
 
 (defun format-msg (stream msg)
 (let ((dt (- (second msg) (cdr *start-time*))))
+(declare (integer dt))
   (multiple-value-bind (s fractions) (floor (+ (car *start-time*) dt) internal-time-units-per-second)
     (let ((ms (floor fractions (floor internal-time-units-per-second 1000))))
     (multiple-value-bind (s mi h d mo) (decode-universal-time s)
@@ -31,7 +38,7 @@
 (let ((message (third msg)))
   (apply #'format (append (list str
 
-(concatenate 'string 
+(concat
 "~&~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d.~3,'0d ~a " (car message))
 
 mo  d  h mi s ms
@@ -48,6 +55,7 @@ mo  d  h mi s ms
 
 (defun log (livello &rest message)
 "main log function"
+;;(declare (integer livello)) ;(declare (type integer livello))
 
 (ifn (start) (format t "could not start the logging system")
 
@@ -55,13 +63,14 @@ mo  d  h mi s ms
   (when (<= level livello)
     (push (list livello (get-internal-real-time) message) *tobe-printed*)))))
 
+(defvar default-log-dir (find-if #'uiop:directory-exists-p '("/var/log/sbcl/" "/tmp/")))
 (defun start(&optional dir FN)
   (iff *print-timer* t
-    (setf dir (if (stringp dir) dir "/var/log/sbcl/")
+    (setf dir (if (stringp dir) dir default-log-dir)
           log-file (merge-pathnames
                     (if (stringp FN) FN "server.log")
                     dir))
-    (ifn (directory dir)
+    (ifn (uiop:directory-exists-p dir)
 	 (format t "refuse to start because ~a does not exist, please create it~%" dir)
 
 (setf *start-time* (cons (* internal-time-units-per-second (get-universal-time)) (get-internal-real-time))

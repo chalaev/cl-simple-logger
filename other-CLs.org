@@ -1,0 +1,30 @@
+The code was developped on [[http://www.sbcl.org/][sbcl]].
+
+It is probably easy to make it work on [[https://www.cons.org/cmucl/][cmucl]] and [[https://clisp.sourceforge.io/][clisp]];
+one just has to find (or write) replacements for the following [[http://www.sbcl.org/][sbcl]]-functions:
+~sb-ext:make-timer~, ~sb-ext:schedule-timer~, and ~sb-ext:unschedule-timer~.
+
+Later I might use the following recipe found online to overcome this difficulty:
+#+BEGIN_SRC lisp
+;; this is for for cmucl, for clisp should be similar
+(defun make-timer (fun period)
+  (mp:make-process #'(lambda ()
+		       (loop
+			  (funcall fun)
+			  (sleep period))) :name "timer"))
+#+END_SRC
+but for now I just don't want to spend time on it.
+
+Another problem with [[https://www.cons.org/cmucl/][cmucl]] and [[https://clisp.sourceforge.io/][clisp]] was that they did not like
+#+BEGIN_SRC lisp
+(eval-when (:compile-toplevel :execute)
+  (load "goodies/macros.lisp"))
+#+END_SRC
+Again, I am pretty sure this can all be fixed without too much effert when/if needed.
+
+----------
+
+GCL 2.6.12 (2016) seems to be incompatible with ~quicklisp~.
+
+BTW, some years ago I've heard that ~GCL~ is abandoned – pity, it was once probably the fastest 
+of all freely-available common lisp dialects :(
