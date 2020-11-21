@@ -1,5 +1,5 @@
 ;; generated from .org
-(declaim (optimize (speed 3) (safety 0)))
+;;(declaim (optimize (speed 3) (safety 0)))
 (defpackage :simple-log
 (:shadow cl:warning cl:debug cl:log cl:error)
 (:nicknames "SL")
@@ -7,20 +7,23 @@
 (:export :log :out-streams :level :start :stop :debug :info :warning :error))
 (in-package :simple-log)
 (eval-when (:compile-toplevel)
-  (loop for field-name in '(debug info warning error) for i from 0 do (defvar field-name i))
+  (loop for field-name in '(debug info warning error) for i from 0 do (defvar field-name i)))
+
+(eval-when (:compile-toplevel)
   (let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
     (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
       '(#p"macros.lisp"))))
 
 (defvar log-types (list 'debug 'info 'warning 'error))
 (loop for field-name in log-types for i from 0 do (set field-name i))
+(declaim (type (integer) *maxLogLevel* level))
 (defvar *maxLogLevel* (1- (length log-types)))
 (defvar level 0 "default (minimal) value")
-;;(declare (integer level))
 
 (defvar out-streams nil "list of auxillary streams for extra log copies")
 (defvar dir nil "directory where log files will be stored")
 (defvar log-file nil "log file name, required before we load the package")
+(declaim (type (integer) *maxLogLevel* level))
 (defvar *start-time* nil "needed to figure out the timing")
 (defvar *queue-lock* (bt:make-lock) "we need locks when running on multi-threading systems")
 (defvar *tobe-printed* nil "log buffer")

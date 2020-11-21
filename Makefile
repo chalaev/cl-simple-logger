@@ -25,6 +25,7 @@ $(quicklispDir)example.bin: generated/simple-log.lisp generated/description.org
 
 generated/simple-log.lisp: simple-log.org
 	emacsclient -e '(org-babel-tangle-file "$<")'
+	-chmod a-x generated/*.lisp
 
 generated/description.org: description.org
 	rsync -au $< $@
@@ -37,6 +38,7 @@ README.md: README.org
 	-chmod a-x $@
 
 clean:
-	-rm -r generated/* $(quicklispDir)*
+	-rm -rf generated/* $(quicklispDir)*
+	$(SBCL) --quit --eval '(progn (asdf:clear-system :shalaev) (asdf:clear-system :simple-log) (asdf:clear-system :simple-log/example))'
 
 .PHONY: clean simple

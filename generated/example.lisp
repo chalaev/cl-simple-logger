@@ -1,13 +1,14 @@
 ;; generated from .org
-(declaim (optimize (speed 3) (safety 0)))
+;;(declaim (optimize (speed 3) (safety 0)))
 (defpackage :simple-log/example
   (:export :main)
   (:use :cl))
 (in-package :simple-log/example)
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
-    (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
-      '(#p"macros.lisp"))))
+
+(eval-when (:compile-toplevel :execute)
+(let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
+  (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
+    '(#p"macros.lisp"))))
 
 (defun log-SLU (type &rest message)
   (apply #'SL:log

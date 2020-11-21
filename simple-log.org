@@ -5,8 +5,9 @@
 #+LATEX_HEADER: \usepackage[letterpaper,hmargin={1.5cm,1.5cm},vmargin={1.3cm,2cm},nohead,nofoot]{geometry}
 
 * Main code
+#+END_SRC
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp :shebang ";; generated from .org"
-(declaim (optimize (speed 3) (safety 0)))
+;;(declaim (optimize (speed 3) (safety 0)))
 (defpackage :simple-log
 (:shadow cl:warning cl:debug cl:log cl:error)
 (:nicknames "SL")
@@ -14,7 +15,12 @@
 (:export :log :out-streams :level :start :stop :debug :info :warning :error))
 (in-package :simple-log)
 (eval-when (:compile-toplevel)
-  (loop for field-name in '(debug info warning error) for i from 0 do (defvar field-name i))
+  (loop for field-name in '(debug info warning error) for i from 0 do (defvar field-name i)))
+#+END_SRC
+Since [[https://github.com/chalaev/lisp-goodies][shalaev]] package includes macros, it is *not enough* just to include ~:shalaev~ in the [[Packaging][dependences list]] in order to successfully compile a package;
+one has to load ~macros.el~ during the compilation using =(eval-when (:compile-toplevel)...)=:
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(eval-when (:compile-toplevel)
   (let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
     (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
       '(#p"macros.lisp"))))
@@ -25,9 +31,9 @@ Let us assign a number to every message type:
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
 (defvar log-types (list 'debug 'info 'warning 'error))
 (loop for field-name in log-types for i from 0 do (set field-name i))
+(declaim (type (integer) *maxLogLevel* level))
 (defvar *maxLogLevel* (1- (length log-types)))
 (defvar level 0 "default (minimal) value")
-;;(declare (integer level))
 #+END_SRC
 ←  the least informative level is 3 (only error messages), and the most informative one is 0 (everything is logged).
 
@@ -36,6 +42,7 @@ Let us assign a number to every message type:
 (defvar out-streams nil "list of auxillary streams for extra log copies")
 (defvar dir nil "directory where log files will be stored")
 (defvar log-file nil "log file name, required before we load the package")
+(declaim (type (integer) *maxLogLevel* level))
 (defvar *start-time* nil "needed to figure out the timing")
 (defvar *queue-lock* (bt:make-lock) "we need locks when running on multi-threading systems")
 (defvar *tobe-printed* nil "log buffer")
@@ -121,9 +128,6 @@ It is better, though, to =(start)= not from the =log= function; in this case we 
     (ifn (uiop:directory-exists-p dir)
 	 (format t "refuse to start because ~a does not exist, please create it~%" dir)
 #+END_SRC
-Should I better have used =probe-file= instead of =osicat:directory-exists-P= and get rid of =:osicat= dependence?
-
-(Is there function similar to elisp'es =file-name-as-directory= in CL?)
 
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
 (setf *start-time* (cons (* internal-time-units-per-second (get-universal-time)) (get-internal-real-time))
@@ -144,18 +148,24 @@ It is recommended to =(stop)= before quitting the code just to be sure that no l
 
 * Example
 Somehow the effect of =(declaim (optimize (speed 3) (safety 0)))= here is infinitesimal, should I write it somewhere else? →
+#+END_SRC
 #+BEGIN_SRC lisp :tangle generated/example.lisp :shebang ";; generated from .org"
-(declaim (optimize (speed 3) (safety 0)))
+;;(declaim (optimize (speed 3) (safety 0)))
 (defpackage :simple-log/example
   (:export :main)
   (:use :cl))
 (in-package :simple-log/example)
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
-    (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
-      '(#p"macros.lisp"))))
 #+END_SRC
 ← it is remarkable that =:shadow= must be mentioned in =defpackage= for both ~:simple-log~ and ~:simple-log/example~ packages.
+
+#+BEGIN_SRC lisp :tangle generated/example.lisp
+(eval-when (:compile-toplevel :execute)
+(let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
+  (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
+    '(#p"macros.lisp"))))
+#+END_SRC
+←  note that if we remove ~:compile-toplevel~ from this block, 
+the compiled binary will fail to run saying that "concat is undefined".
 
 In order to distinguish messages comming from different sources (for example, different services running on the lisp server)
 let us define different log functions (=log-SLU= and =log-SLD= in this example), each adding its unique prefix to every log message:
@@ -200,7 +210,7 @@ Long description should be loaded from ~description.org~:
   :mailto "oleg@chalaev.com"
   :licence "MIT"
   :version "0"
-  :depends-on (:bordeaux-threads :local-time :osicat :uiop)
+  :depends-on (:bordeaux-threads :local-time :uiop)
   :serial t
   :components ((:file "simple-log")))
 #+END_SRC
