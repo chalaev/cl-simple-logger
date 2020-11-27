@@ -1,44 +1,69 @@
-
-# The parameters SBCL and quicklispDir should probably be different on your computer:
-# SBCL is the SBCL excecutable. You may use the standard one (/usr/bin/sbcl), but it is better to compile it manually.
 SBCL = ~/local/bin/sbcl
-# quicklispDir is the Quicklisp directory where my local packages are stored:
-quicklispDir = ~/quicklisp/local-projects/simple-log/
+# where my local packages are stored:
+quicklispDir = $$HOME/quicklisp/local-projects/simple-log
+headersDir = generated/headers
 
-simple: README.md generated/example.bin generated/description.org
-	@echo "***TESTING SOURCE CODE IN INTERPRETING MODE***"
-	$(SBCL) --quit --eval '(require :simple-log)' --load generated/example.lisp --eval '(simple-log/example:main)'
-	@echo "***=====***"
-	@echo "*** You should have seen 4 log messages above, both in terminal and in log file ***"
-	@echo "***=====***"
-	@echo "*** Running the binary ./generated/example.bin should produce similar results (with different time stamps) ***"
+LFNs = simple-log example tests
+LISPs = $(addsuffix .lisp, $(LFNs))
+package = $(LISPs) simple-log.asd description.org
 
-generated/example.bin: $(quicklispDir)example.bin
-	cp -a $< $@
-	-chgrp tmp $@
+OFNs = simple-log packaging
+ORGs = $(addsuffix .org, $(OFNs))
 
-$(quicklispDir)example.bin: generated/simple-log.lisp generated/description.org
-	rsync -au goodies generated/example.lisp generated/simple-log.asd generated/simple-log.lisp description.org $(quicklispDir)
-	@echo "*** COMPILING THE BINARY***"
-	$(SBCL) --quit --load generated/simple-log.asd --eval "(asdf:make :simple-log/example)"
-	-chgrp tmp $@
+# unless I mention generated/from/*.org files here, they will be considered temporary and auto-erased so emacsclient will always be called on every make:
+all: quicklisp README.md generated/simple-log.tbz $(addprefix generated/from/, $(ORGs)) $(quicklispDir)/example.bin git
+quicklisp: $(quicklispDir)/ $(addprefix $(quicklispDir)/, $(package)) $(addprefix generated/from/, $(ORGs))
 
-generated/simple-log.lisp: simple-log.org
-	emacsclient -e '(org-babel-tangle-file "$<")'
-	-chmod a-x generated/*.lisp
+$(quicklispDir)/example.bin: quicklisp generated/description.org
+	@echo "*** COMPILING THE BINARY ***"
+	$(SBCL) --quit --eval "(asdf:make :simple-log/example)"
+	@echo "*** COMPILED THE BINARY ***"
+	@echo "Now run it to see the log messages both in terminal and in the log file"
+	-@chgrp tmp $@
+
+generated/simple-log.tbz: quicklisp
+	@echo "Testing before we package it:"
+	@$(SBCL) --eval "(asdf:operate 'asdf:test-op :simple-log)" --eval "(uiop:quit simple-log/tests:N-failed)"
+	@echo "\n\n`date '+%m/%d %H:%M'` ALL TESTS PASSED :)\n"
+	tar jcfv $@ --directory=$(quicklispDir)/..  simple-log
+	-@chgrp tmp $@
 
 generated/description.org: description.org
-	rsync -au $< $@
-	-chgrp tmp $@
-	-chmod a-x $@
+	cat $< > $@
+	-@chgrp tmp $@
+
+$(quicklispDir)/%.lisp: generated/from/simple-log.org generated/from/packaging.org
+	cat generated/headers/$(notdir $@) generated/$(notdir $@) > $@
+	-@chgrp tmp $@
+
+$(quicklispDir)/%.asd: generated/from/packaging.org
+	cat generated/$(notdir $@) > $@
+	-@chgrp tmp $@
+
+$(quicklispDir)/%.org: %.org
+	cat $< > $@
+	-@chgrp tmp $@
+
+generated/from/%.org: %.org generated/from/ generated/headers/
+	echo `emacsclient -e '(printangle "$<")'` | sed 's/"//g' > $@
+	-@chgrp tmp $@ `cat $@`
+	-@chmod a-x `cat $@`
 
 README.md: README.org
 	emacsclient -e '(progn (find-file "README.org") (org-md-export-to-markdown))'
-	-chgrp tmp $@
-	-chmod a-x $@
+	-@chgrp tmp $@
+	-@chmod a-x $@
 
 clean:
-	-rm -rf generated/* $(quicklispDir)*
-	$(SBCL) --quit --eval '(progn (asdf:clear-system :shalaev) (asdf:clear-system :simple-log) (asdf:clear-system :simple-log/example))'
+	-$(SBCL) --quit --eval '(progn (asdf:clear-system :simple-log) (asdf:clear-system :simple-log/example)  (asdf:clear-system :simple-log/tests))'
+	-rm -r $(quicklispDir) generated
 
-.PHONY: clean simple
+.PHONY: clean quicklisp all git
+
+%/:
+	[ -d $@ ] || mkdir -p $@
+
+git: generated/simple-log.tbz next-commit.txt README.md
+	@echo "===="
+	-@echo "git commit -am '"`head -n1 next-commit.txt`"'"
+	@echo "git push origin master"

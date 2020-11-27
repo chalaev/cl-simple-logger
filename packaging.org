@@ -1,0 +1,111 @@
+Packaging
+
+* Main package
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+(asdf:defsystem "simple-log"
+  :class :package-inferred-system
+  :description "minimalistic CL logger"
+#+END_SRC
+Long description should be loaded from ~description.org~:
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+ :long-description
+#.(uiop:read-file-string (uiop/pathname:subpathname *load-pathname* "description.org"))
+  :author "Oleg Shalaev"
+  :mailto "oleg@chalaev.com"
+  :licence "MIT"
+  :version "0"
+  :depends-on (:bordeaux-threads :local-time :uiop :shalaev/macros)
+  :components ((:file "simple-log"))
+  :in-order-to ((test-op (test-op "simple-log/tests"))))
+#+END_SRC
+
+When =sbcl= is compiled with (disabled by default) =sb-core-compression= feature,
+one can significantly reduce the size of an executable using SBCL's core compression: 42 to 13MB  (for SBCL 2.0.10).
+(See global variable =*features*= to see if =sb-core-compression= is supported.)
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+#+sb-core-compression
+(defmethod asdf:perform ((o asdf:image-op) (c asdf:system))
+  (uiop:dump-image (asdf:output-file o c) :executable t :compression t))
+#+END_SRC
+
+#+BEGIN_SRC lisp :tangle generated/headers/simple-log.lisp
+;;(declaim (optimize (speed 3) (safety 0)))
+(defpackage :simple-log
+(:shadow cl:warning cl:debug cl:log cl:error)
+(:nicknames "SL")
+(:use :cl :shalaev/macros)
+(:export :log :out-streams :level :start :stop :debug :info :warning :error))
+(in-package :simple-log)
+(eval-when (:compile-toplevel)
+  (loop for field-name in '(debug info warning error) for i from 0 do (defvar field-name i)))
+#+END_SRC
+← it is remarkable that =:shadow= must be mentioned in =defpackage= for both ~:simple-log~ and ~:simple-log/example~ packages.
+
+* Example
+Declaring example package in the same (main) =.asd= file:
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+(asdf:defsystem "simple-log/example"
+:class :package-inferred-system
+:depends-on (:simple-log :shalaev/macros)
+#+END_SRC
+
+3 next lines serve to assist with building binary image:
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+:build-operation  "program-op"
+:build-pathname "example.bin"
+:entry-point "simple-log/example:main"
+#+END_SRC
+where ~:build-pathname~ is relative to the package placement
+(for my ~quicklisp~, it would be =~/quicklisp/local-projects/simple-log/=).
+
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+:description "a compilable example for simple-log"
+:author "Oleg Shalaev"
+:mailto "oleg@chalaev.com"
+:licence "MIT"
+:version "0"
+:components ((:file "example")))
+#+END_SRC
+
+#+BEGIN_SRC lisp :tangle generated/headers/example.lisp
+;;(declaim (optimize (speed 3) (safety 0)))
+(defpackage :simple-log/example
+  (:shadow cl:warning cl:debug cl:log cl:error)
+  (:export :main)
+  (:use :cl :shalaev/macros :simple-log))
+(in-package :simple-log/example)
+#+END_SRC
+
+* Tests
+#+BEGIN_SRC lisp :tangle generated/simple-log.asd
+(asdf:defsystem "simple-log/tests"
+  :class :package-inferred-system
+  :description "testing"
+  :author "Oleg Shalaev"
+  :mailto "oleg@chalaev.com"
+  :licence "MIT"
+  :version "0"
+  :depends-on (:simple-log :sb-rt)
+  :components ((:file "tests"))
+  :perform (test-op (o c)
+(flet ((run-tests (&rest args)
+         (apply (intern (string '#:run-tests) '#:simple-log/tests) args)))
+  (run-tests :compiled nil)
+  (run-tests :compiled t))))
+#+END_SRC
+
+#+BEGIN_SRC lisp :tangle generated/headers/tests.lisp
+(defpackage :simple-log/tests
+  (:use :cl :shalaev/macros :sb-rt)
+  (:export :N-failed)
+  (:import-from :sb-rt :*compile-tests* :*expected-failures*))
+(in-package :simple-log/tests)
+#+END_SRC
+
+The variable =N-failed= will contain the number of failed tests and will be equal to SBCL's exit code, see [[file:Makefile][Makefile]]:
+#+BEGIN_SRC lisp :tangle generated/headers/tests.lisp
+(defvar N-failed 0 "how many tests failed")
+
+(defun run-tests (&key ((:compiled *compile-tests*)))
+  (unless (do-tests) (incf N-failed)))
+#+END_SRC

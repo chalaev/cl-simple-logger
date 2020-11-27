@@ -5,27 +5,6 @@
 #+LATEX_HEADER: \usepackage[letterpaper,hmargin={1.5cm,1.5cm},vmargin={1.3cm,2cm},nohead,nofoot]{geometry}
 
 * Main code
-#+END_SRC
-#+BEGIN_SRC lisp :tangle generated/simple-log.lisp :shebang ";; generated from .org"
-;;(declaim (optimize (speed 3) (safety 0)))
-(defpackage :simple-log
-(:shadow cl:warning cl:debug cl:log cl:error)
-(:nicknames "SL")
-(:use :cl)
-(:export :log :out-streams :level :start :stop :debug :info :warning :error))
-(in-package :simple-log)
-(eval-when (:compile-toplevel)
-  (loop for field-name in '(debug info warning error) for i from 0 do (defvar field-name i)))
-#+END_SRC
-Since [[https://github.com/chalaev/lisp-goodies][shalaev]] package includes macros, it is *not enough* just to include ~:shalaev~ in the [[Packaging][dependences list]] in order to successfully compile a package;
-one has to load ~macros.el~ during the compilation using =(eval-when (:compile-toplevel)...)=:
-#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
-(eval-when (:compile-toplevel)
-  (let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
-    (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
-      '(#p"macros.lisp"))))
-#+END_SRC
-
 ** Variables
 Let us assign a number to every message type:
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
@@ -56,11 +35,12 @@ These will be appended to a log file every second by the timer
 
 ** Secondary functions
 Every log message will be printed with =timer= using =format-msg=:
+
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
-(defun format-msg (stream msg)
-(let ((dt (- (second msg) (cdr *start-time*))))
+(defun format-msg(stream msg &optional (ST *start-time*))
+(let ((dt (- (second msg) (cdr ST))))
 (declare (integer dt))
-  (multiple-value-bind (s fractions) (floor (+ (car *start-time*) dt) internal-time-units-per-second)
+  (multiple-value-bind (s fractions) (floor (+ (car ST) dt) internal-time-units-per-second)
     (let ((ms (floor fractions (floor internal-time-units-per-second 1000))))
     (multiple-value-bind (s mi h d mo) (decode-universal-time s)
 (loop for str in (cons stream out-streams) do
@@ -84,6 +64,23 @@ mo  d  h mi s ms
 (nth (first msg) log-types)); e.g., INFO
 (cdr message))))
 (format str "~%")))))))
+#+END_SRC
+
+Note: =internal-time-units-per-second= varies in different SBCL versions, and this might affect this test:
+#+BEGIN_SRC lisp :tangle generated/tests.lisp
+(deftest format-msg.1
+(let* ((fstr (make-array '(0) :element-type 'base-char :fill-pointer 0 :adjustable t))
+       (just-a-variable 345)
+       (typical-values (make-hash-table)))
+;;(SL:start)
+(shalaev/macros:hset typical-values 'start-time '(3815366330000 . 14448687))
+(shalaev/macros:hset typical-values 'get-internal-real-time 121111111)
+(let ((msg (list SL:debug (gethash 'get-internal-real-time typical-values) (list "abc ~d" just-a-variable))))
+(with-output-to-string (test-stream fstr)
+  (SL::format-msg test-stream msg (gethash 'start-time typical-values)))
+fstr))
+"02/13 22:51:12.992 DEBUG abc 345
+")
 #+END_SRC
 
 =printer= is called by =print-timer= every second:
@@ -148,24 +145,6 @@ It is recommended to =(stop)= before quitting the code just to be sure that no l
 
 * Example
 Somehow the effect of =(declaim (optimize (speed 3) (safety 0)))= here is infinitesimal, should I write it somewhere else? →
-#+END_SRC
-#+BEGIN_SRC lisp :tangle generated/example.lisp :shebang ";; generated from .org"
-;;(declaim (optimize (speed 3) (safety 0)))
-(defpackage :simple-log/example
-  (:export :main)
-  (:use :cl))
-(in-package :simple-log/example)
-#+END_SRC
-← it is remarkable that =:shadow= must be mentioned in =defpackage= for both ~:simple-log~ and ~:simple-log/example~ packages.
-
-#+BEGIN_SRC lisp :tangle generated/example.lisp
-(eval-when (:compile-toplevel :execute)
-(let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
-  (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
-    '(#p"macros.lisp"))))
-#+END_SRC
-←  note that if we remove ~:compile-toplevel~ from this block, 
-the compiled binary will fail to run saying that "concat is undefined".
 
 In order to distinguish messages comming from different sources (for example, different services running on the lisp server)
 let us define different log functions (=log-SLU= and =log-SLD= in this example), each adding its unique prefix to every log message:
@@ -195,59 +174,4 @@ Finally we test the logging service:
 (sleep 0.111)
 (log-SLD SL:info "this is the ~ath info from the log service #~d" 137 4)
 (SL:stop))
-#+END_SRC
-* Packaging
-** Main package
-#+BEGIN_SRC lisp :tangle generated/simple-log.asd
-(asdf:defsystem "simple-log"
-  :description "minimalistic CL logger"
-#+END_SRC
-Long description should be loaded from ~description.org~:
-#+BEGIN_SRC lisp :tangle generated/simple-log.asd
- :long-description
-#.(uiop:read-file-string (uiop/pathname:subpathname *load-pathname* "description.org"))
-  :author "Oleg Shalaev"
-  :mailto "oleg@chalaev.com"
-  :licence "MIT"
-  :version "0"
-  :depends-on (:bordeaux-threads :local-time :uiop)
-  :serial t
-  :components ((:file "simple-log")))
-#+END_SRC
-
-When =sbcl= is compiled with (disabled by default) =sb-core-compression= feature,
-one can significantly reduce the size of an executable using SBCL's core compression: 42 to 13MB  (for SBCL 2.0.10).
-(See global variable =*features*= to see if =sb-core-compression= is supported.)
-#+BEGIN_SRC lisp :tangle generated/simple-log.asd
-#+sb-core-compression
-(defmethod asdf:perform ((o asdf:image-op) (c asdf:system))
-  (uiop:dump-image (asdf:output-file o c) :executable t :compression t))
-#+END_SRC
-
-(BTW, in the past there were two more symbols exported: =:start-all= and =:stop-all=,
-but as of 2020-11-08 I doubt if they should really be defined here.)
-
-** Example
-Declaring example package in the same (main) =.asd= file:
-#+BEGIN_SRC lisp :tangle generated/simple-log.asd
-(asdf:defsystem "simple-log/example"
-:depends-on (:simple-log)
-#+END_SRC
-
-3 next lines serve to assist with building binary image:
-#+BEGIN_SRC lisp :tangle generated/simple-log.asd
-:build-operation  "program-op"
-:build-pathname "example.bin"
-:entry-point "simple-log/example:main"
-#+END_SRC
-where ~:build-pathname~ is relative to the package placement
-(for my ~quicklisp~, it would be =~/quicklisp/local-projects/simple-log/=).
-
-#+BEGIN_SRC lisp :tangle generated/simple-log.asd
-:description "an example for simple-log"
-:author "Oleg Shalaev"
-:mailto "oleg@chalaev.com"
-:licence "MIT"
-:version "0"
-:components ((:file "example")))
 #+END_SRC

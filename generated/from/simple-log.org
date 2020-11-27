@@ -1,0 +1,4 @@
+generated/example.lisp
+generated/tests.lisp
+generated/simple-log.lisp
+

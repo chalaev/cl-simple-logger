@@ -13,14 +13,6 @@ Later I might use the following recipe found online to overcome this difficulty:
 			  (funcall fun)
 			  (sleep period))) :name "timer"))
 #+END_SRC
-but for now I just don't want to spend time on it.
-
-Another problem with [[https://www.cons.org/cmucl/][cmucl]] and [[https://clisp.sourceforge.io/][clisp]] was that they did not like
-#+BEGIN_SRC lisp
-(eval-when (:compile-toplevel :execute)
-  (load "goodies/macros.lisp"))
-#+END_SRC
-Again, I am pretty sure this can all be fixed without too much effert when/if needed.
 
 ----------
 

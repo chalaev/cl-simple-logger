@@ -1,19 +1,3 @@
-;; generated from .org
-;;(declaim (optimize (speed 3) (safety 0)))
-(defpackage :simple-log
-(:shadow cl:warning cl:debug cl:log cl:error)
-(:nicknames "SL")
-(:use :cl)
-(:export :log :out-streams :level :start :stop :debug :info :warning :error))
-(in-package :simple-log)
-(eval-when (:compile-toplevel)
-  (loop for field-name in '(debug info warning error) for i from 0 do (defvar field-name i)))
-
-(eval-when (:compile-toplevel)
-  (let ((goodies/ (uiop:ensure-directory-pathname "goodies")))
-    (mapcar #'(lambda(FN) (load (merge-pathnames FN goodies/)))
-      '(#p"macros.lisp"))))
-
 (defvar log-types (list 'debug 'info 'warning 'error))
 (loop for field-name in log-types for i from 0 do (set field-name i))
 (declaim (type (integer) *maxLogLevel* level))
@@ -30,10 +14,10 @@
 
 (defvar *print-timer* nil "needed for flushing the log every second")
 
-(defun format-msg (stream msg)
-(let ((dt (- (second msg) (cdr *start-time*))))
+(defun format-msg(stream msg &optional (ST *start-time*))
+(let ((dt (- (second msg) (cdr ST))))
 (declare (integer dt))
-  (multiple-value-bind (s fractions) (floor (+ (car *start-time*) dt) internal-time-units-per-second)
+  (multiple-value-bind (s fractions) (floor (+ (car ST) dt) internal-time-units-per-second)
     (let ((ms (floor fractions (floor internal-time-units-per-second 1000))))
     (multiple-value-bind (s mi h d mo) (decode-universal-time s)
 (loop for str in (cons stream out-streams) do
