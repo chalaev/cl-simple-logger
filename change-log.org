@@ -1,10 +1,13 @@
 Change log for [[https://github.com/chalaev/cl-simple-logger][cl-simple-logger]].
 
 * Lazy development
-Because of its simplicity this code does not have many bug to be fixed or new ideas to be implemented.
+Because of its simplicity this code does not have many bugs to be fixed or new ideas to be implemented.
 
 ** Packaged and compiled
-I think that this code is virtually bug free and stable (no najor changes expected) now.
+I think that this code is virtually bug free and stable (no major changes expected) now.
+
+*** 2020-11-28
+added change-log.org + minor updates to [[file:Makefile][Makefile]] and [[file:README.org][README.org]]
 
 *** 2020-11-27
 now using "shalaev/macros" package + improved (README + Makefile) + added (.tbz + generated/*)

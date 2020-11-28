@@ -51,6 +51,7 @@ generated/from/%.org: %.org generated/from/ generated/headers/
 
 README.md: README.org
 	emacsclient -e '(progn (find-file "README.org") (org-md-export-to-markdown))'
+	sed -i "s/\.md)/.org)/g"  $@
 	-@chgrp tmp $@
 	-@chmod a-x $@
 

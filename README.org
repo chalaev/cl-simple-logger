@@ -57,14 +57,13 @@ Notes:
 * Files
 1. [[file:README.org][README.org]] generates =README.md= for [[https://notabug.org/shalaev/cl-simple-logger][notabug]] and [[https://github.com/chalaev/cl-simple-logger][github]].
 2. [[file:simple-log.org][simple-log.org]] contains the code from =generated/*= together with explanations.
-3. [[file:goodies/macros.lisp][macros.lisp]] is copied from the [[https://notabug.org/shalaev/lisp-goodies][lisp-goodies]] project.
-4. [[file:Makefile][Makefile]] is needed to test the changes made to the code; it
+3. [[file:Makefile][Makefile]] is needed to test the changes made to the code; it
    1. uses ~emacs~ to generate the source code from the ~.org~ file,
    2. launches [[file:generated/example.lisp][generated/example.lisp]] in interpreting mode, and
    3. compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~.
    4. creates [[file:simple-log.tbz][simple-log.tbz]]
-5. [[file:other-CLs.org][other-CLs.org]] contains a note about making the code compatible with other CL dialects. (This does not seem to be hard.)
-6. [[file:helpers/][helpers/*]] assist compilation.
+4. [[file:other-CLs.org][other-CLs.org]] contains a note about making the code compatible with other CL dialects. (This does not seem to be hard.)
+5. [[file:helpers/][helpers/*]] assist compilation.
 
 * License
 This code is released under [[https://mit-license.org/][MIT license]].
