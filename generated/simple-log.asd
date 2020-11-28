@@ -1,4 +1,4 @@
-(asdf:defsystem "simple-log"
+(defsystem "simple-log"
   :class :package-inferred-system
   :description "minimalistic CL logger"
 
@@ -7,7 +7,7 @@
   :author "Oleg Shalaev"
   :mailto "oleg@chalaev.com"
   :licence "MIT"
-  :version "0"
+  :version (:read-file-line "version.org")
   :depends-on (:bordeaux-threads :local-time :uiop :shalaev/macros)
   :components ((:file "simple-log"))
   :in-order-to ((test-op (test-op "simple-log/tests"))))
@@ -16,7 +16,7 @@
 (defmethod asdf:perform ((o asdf:image-op) (c asdf:system))
   (uiop:dump-image (asdf:output-file o c) :executable t :compression t))
 
-(asdf:defsystem "simple-log/example"
+(defsystem "simple-log/example"
 :class :package-inferred-system
 :depends-on (:simple-log :shalaev/macros)
 
@@ -28,16 +28,16 @@
 :author "Oleg Shalaev"
 :mailto "oleg@chalaev.com"
 :licence "MIT"
-:version "0"
+:version (:read-file-line "version.org")
 :components ((:file "example")))
 
-(asdf:defsystem "simple-log/tests"
+(defsystem "simple-log/tests"
   :class :package-inferred-system
   :description "testing"
   :author "Oleg Shalaev"
   :mailto "oleg@chalaev.com"
   :licence "MIT"
-  :version "0"
+  :version (:read-file-line "version.org")
   :depends-on (:simple-log :sb-rt)
   :components ((:file "tests"))
   :perform (test-op (o c)

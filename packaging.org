@@ -1,8 +1,8 @@
-Packaging
+*Packaging*
 
 * Main package
 #+BEGIN_SRC lisp :tangle generated/simple-log.asd
-(asdf:defsystem "simple-log"
+(defsystem "simple-log"
   :class :package-inferred-system
   :description "minimalistic CL logger"
 #+END_SRC
@@ -13,7 +13,7 @@ Long description should be loaded from ~description.org~:
   :author "Oleg Shalaev"
   :mailto "oleg@chalaev.com"
   :licence "MIT"
-  :version "0"
+  :version (:read-file-line "version.org")
   :depends-on (:bordeaux-threads :local-time :uiop :shalaev/macros)
   :components ((:file "simple-log"))
   :in-order-to ((test-op (test-op "simple-log/tests"))))
@@ -44,7 +44,7 @@ one can significantly reduce the size of an executable using SBCL's core compres
 * Example
 Declaring example package in the same (main) =.asd= file:
 #+BEGIN_SRC lisp :tangle generated/simple-log.asd
-(asdf:defsystem "simple-log/example"
+(defsystem "simple-log/example"
 :class :package-inferred-system
 :depends-on (:simple-log :shalaev/macros)
 #+END_SRC
@@ -63,7 +63,7 @@ where ~:build-pathname~ is relative to the package placement
 :author "Oleg Shalaev"
 :mailto "oleg@chalaev.com"
 :licence "MIT"
-:version "0"
+:version (:read-file-line "version.org")
 :components ((:file "example")))
 #+END_SRC
 
@@ -78,13 +78,13 @@ where ~:build-pathname~ is relative to the package placement
 
 * Tests
 #+BEGIN_SRC lisp :tangle generated/simple-log.asd
-(asdf:defsystem "simple-log/tests"
+(defsystem "simple-log/tests"
   :class :package-inferred-system
   :description "testing"
   :author "Oleg Shalaev"
   :mailto "oleg@chalaev.com"
   :licence "MIT"
-  :version "0"
+  :version (:read-file-line "version.org")
   :depends-on (:simple-log :sb-rt)
   :components ((:file "tests"))
   :perform (test-op (o c)

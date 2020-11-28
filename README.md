@@ -1,21 +1,21 @@
 
 # Table of Contents
 
-1.  [The scope](#org87baf3d)
-2.  [Prerequisites](#orgf711a1d)
-3.  [Quick start](#org575c7e0)
-    1.  [Create log directory](#orgfd03d86)
-    2.  [Install the package](#org71c68ab)
-    3.  [Test in an SBCL session](#org9389d61)
-4.  [Packaging, compiling and testing](#orga566b66)
-5.  [Files](#org7b6c25f)
-6.  [License](#org9a5861a)
-7.  [Support](#org2c46f77)
+1.  [The scope](#orgb556922)
+2.  [Prerequisites](#orgb3f45c7)
+3.  [Quick start](#org1730983)
+    1.  [Create log directory](#org250d8f5)
+    2.  [Install the package](#org3fe4348)
+    3.  [Test in an SBCL session](#orgd07dd64)
+4.  [Packaging, compiling and testing](#orgaa05241)
+5.  [Files](#orgd7f1023)
+6.  [License](#org8ae03d0)
+7.  [Support](#org85648b9)
 
 Simple logging system for Common Lisp; currently works only on [sbcl](http://www.sbcl.org/), see [other-CLs.org](other-CLs.md).
 
 
-<a id="org87baf3d"></a>
+<a id="orgb556922"></a>
 
 # The scope
 
@@ -27,7 +27,7 @@ Simple logging system for Common Lisp; currently works only on [sbcl](http://www
 Examples of other CL log systems: [log4cl](https://github.com/7max/log4cl), [cl-log](https://github.com/nicklevine/cl-log).
 
 
-<a id="orgf711a1d"></a>
+<a id="orgb3f45c7"></a>
 
 # Prerequisites
 
@@ -37,14 +37,14 @@ Unpack [simple-log.tbz](https://github.com/chalaev/lisp-goodies/blob/master/gene
 `tar xjfv simple-log.tbz --directory=$HOME/quicklisp/local-projects/`
 
 
-<a id="org575c7e0"></a>
+<a id="org1730983"></a>
 
 # Quick start
 
 Configure the log system before launching the log:
 
 
-<a id="orgfd03d86"></a>
+<a id="org250d8f5"></a>
 
 ## Create log directory
 
@@ -58,7 +58,7 @@ Under root privileges:
 where `shalaev` should be replaced with your user name.
 
 
-<a id="org71c68ab"></a>
+<a id="org3fe4348"></a>
 
 ## Install the package
 
@@ -66,14 +66,14 @@ Unpack [simple-log.tbz](generated/cl-package.tbz) into your [Quicklisp](https://
 `tar xjfv simple-log.tbz --directory=$HOME/quicklisp/local-projects/`
 
 
-<a id="org9389d61"></a>
+<a id="orgd07dd64"></a>
 
 ## Test in an SBCL session
 
 Open [quick-start.lisp](quick-start.lisp) and evaluate it in an interactive SBCL session.
 
 
-<a id="orga566b66"></a>
+<a id="orgaa05241"></a>
 
 # Packaging, compiling and testing
 
@@ -101,7 +101,7 @@ Notes:
     the resulting binary will be several times larger than 13mb.
 
 
-<a id="org7b6c25f"></a>
+<a id="orgd7f1023"></a>
 
 # Files
 
@@ -114,16 +114,17 @@ Notes:
     3.  compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin`.
     4.  creates [simple-log.tbz](simple-log.tbz)
 5.  [other-CLs.org](other-CLs.md) contains a note about making the code compatible with other CL dialects. (This does not seem to be hard.)
+6.  [helpers/\*](helpers/) assist compilation.
 
 
-<a id="org9a5861a"></a>
+<a id="org8ae03d0"></a>
 
 # License
 
 This code is released under [MIT license](https://mit-license.org/).
 
 
-<a id="org2c46f77"></a>
+<a id="org85648b9"></a>
 
 # Support
 

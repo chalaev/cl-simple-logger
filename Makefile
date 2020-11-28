@@ -5,7 +5,7 @@ headersDir = generated/headers
 
 LFNs = simple-log example tests
 LISPs = $(addsuffix .lisp, $(LFNs))
-package = $(LISPs) simple-log.asd description.org
+package = $(LISPs) simple-log.asd description.org version.org
 
 OFNs = simple-log packaging
 ORGs = $(addsuffix .org, $(OFNs))
@@ -56,7 +56,7 @@ README.md: README.org
 
 clean:
 	-$(SBCL) --quit --eval '(progn (asdf:clear-system :simple-log) (asdf:clear-system :simple-log/example)  (asdf:clear-system :simple-log/tests))'
-	-rm -r $(quicklispDir) generated
+	-rm -r $(quicklispDir) generated version.org
 
 .PHONY: clean quicklisp all git
 
@@ -67,3 +67,9 @@ git: generated/simple-log.tbz next-commit.txt README.md
 	@echo "===="
 	-@echo "git commit -am '"`head -n1 next-commit.txt`"'"
 	@echo "git push origin master"
+
+version.org: change-log.org helpers/derive-version.el
+	emacsclient -e '(progn (load "$(CURDIR)/helpers/derive-version.el") (format-version "$<"))' | sed 's/"//g' > $@
+	echo "← generated `date '+%m/%d %H:%M'` from [[file:$<][$<]]" >> $@
+	echo "by [[file:helpers/derive-version.el][derive-version.el]]" >> $@
+	-@chgrp tmp $@

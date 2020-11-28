@@ -1,0 +1,16 @@
+Change log for [[https://github.com/chalaev/cl-simple-logger][cl-simple-logger]].
+
+* Lazy development
+Because of its simplicity this code does not have many bug to be fixed or new ideas to be implemented.
+
+** Packaged and compiled
+I think that this code is virtually bug free and stable (no najor changes expected) now.
+
+*** 2020-11-27
+now using "shalaev/macros" package + improved (README + Makefile) + added (.tbz + generated/*)
+
+*** 2020-11-21
+became independent of (probably abandoned) "osicat" package
+
+*** 2020-11-14
+added other-CLs.org + improved portability + updated asdf and defpackage declarations
