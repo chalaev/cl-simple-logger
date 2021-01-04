@@ -3,11 +3,11 @@
        (just-a-variable 345)
        (typical-values (make-hash-table)))
 ;;(SL:start)
-(shalaev/macros:hset typical-values 'start-time '(3815366330000 . 14448687))
-(shalaev/macros:hset typical-values 'get-internal-real-time 121111111)
-(let ((msg (list SL:debug (gethash 'get-internal-real-time typical-values) (list "abc ~d" just-a-variable))))
+(SHM:hset typical-values 'start-time '(3818619513 . 5385255))
+(SHM:hset typical-values 'get-internal-real-time-ms 5432832)
+(let((msg(list SL:debug (gethash 'get-internal-real-time-ms typical-values) (list "abc ~d" just-a-variable))))
 (with-output-to-string (test-stream fstr)
   (SL::format-msg test-stream msg (gethash 'start-time typical-values)))
 fstr))
-"02/13 22:51:12.992 DEBUG abc 345
+"01/02 18:39:20.577 DEBUG abc 345
 ")

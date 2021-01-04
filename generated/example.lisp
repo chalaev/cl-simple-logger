@@ -1,9 +1,9 @@
-(defun log-SLU (type &rest message)
+(defun log-SLU (log-type &rest message)
   (apply #'SL:log
-    (cons type (cons (concat "SLU " (car message)) (cdr message)))))
-(defun log-SLD (type &rest message)
+    (cons log-type (cons (concat "SLU " (car message)) (cdr message)))))
+(defun log-SLD (log-type &rest message)
   (apply #'SL:log
-    (cons type (cons (concat "SLD " (car message)) (cdr message)))))
+    (cons log-type (cons (concat "SLD " (car message)) (cdr message)))))
 
 (defun main()
   (setf simple-log:out-streams (list *standard-output*))

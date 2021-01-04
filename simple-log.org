@@ -16,15 +16,23 @@ Let us assign a number to every message type:
 #+END_SRC
 ←  the least informative level is 3 (only error messages), and the most informative one is 0 (everything is logged).
 
+I want all my time variables to be measured in units of
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+(let((ms(/ internal-time-units-per-second 1000)))
+(defun ms(internal-real-time)
+  (round(/ internal-real-time ms))))
+#+END_SRC
+← transforms internal time to milliseconds.
+
 [Obsolete note: In the past there was an exported variable SO (="standard output") probably connected with =out-streams=.]
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
 (defvar out-streams nil "list of auxillary streams for extra log copies")
 (defvar dir nil "directory where log files will be stored")
 (defvar log-file nil "log file name, required before we load the package")
 (declaim (type (integer) *maxLogLevel* level))
-(defvar *start-time* nil "needed to figure out the timing")
-(defvar *queue-lock* (bt:make-lock) "we need locks when running on multi-threading systems")
-(defvar *tobe-printed* nil "log buffer")
+(defvar *start-time* nil)
+(defvar *queue-lock* (bt:make-lock) "we need locks on multi-threading systems")
+(defvar *tobe-printed* nil "log messages buffer")
 #+END_SRC
 where =*tobe-printed*= accumulates log messages.
 
@@ -36,17 +44,17 @@ These will be appended to a log file every second by the timer
 ** Secondary functions
 Every log message will be printed with =timer= using =format-msg=:
 
+#+END_SRC
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
 (defun format-msg(stream msg &optional (ST *start-time*))
-(let ((dt (- (second msg) (cdr ST))))
-(declare (integer dt))
-  (multiple-value-bind (s fractions) (floor (+ (car ST) dt) internal-time-units-per-second)
-    (let ((ms (floor fractions (floor internal-time-units-per-second 1000))))
-    (multiple-value-bind (s mi h d mo) (decode-universal-time s)
+;; (declare (integer s))
+(multiple-value-bind (s ms) (floor (- (cadr msg) (cdr ST)) 1000)
+#+END_SRC
+← measured in ms.
+#+BEGIN_SRC lisp :tangle generated/simple-log.lisp
+    (multiple-value-bind (s mi h d mo) (decode-universal-time (+ (car ST) s))
 (loop for str in (cons stream out-streams) do
 #+END_SRC
-where =internal-time-units-per-second= was 1000 for older ~sbcl~ versions, but for 2.0.10 it is 1000000.
-
 =message= will contain both format string and args:
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
 (let ((message (third msg)))
@@ -63,7 +71,7 @@ Using powerful (in CL) ~format~ abilities fot time output:
 mo  d  h mi s ms
 (nth (first msg) log-types)); e.g., INFO
 (cdr message))))
-(format str "~%")))))))
+(format str "~%")))))
 #+END_SRC
 
 Note: =internal-time-units-per-second= varies in different SBCL versions, and this might affect this test:
@@ -73,13 +81,13 @@ Note: =internal-time-units-per-second= varies in different SBCL versions, and th
        (just-a-variable 345)
        (typical-values (make-hash-table)))
 ;;(SL:start)
-(shalaev/macros:hset typical-values 'start-time '(3815366330000 . 14448687))
-(shalaev/macros:hset typical-values 'get-internal-real-time 121111111)
-(let ((msg (list SL:debug (gethash 'get-internal-real-time typical-values) (list "abc ~d" just-a-variable))))
+(SHM:hset typical-values 'start-time '(3818619513 . 5385255))
+(SHM:hset typical-values 'get-internal-real-time-ms 5432832)
+(let((msg(list SL:debug (gethash 'get-internal-real-time-ms typical-values) (list "abc ~d" just-a-variable))))
 (with-output-to-string (test-stream fstr)
   (SL::format-msg test-stream msg (gethash 'start-time typical-values)))
 fstr))
-"02/13 22:51:12.992 DEBUG abc 345
+"01/02 18:39:20.577 DEBUG abc 345
 ")
 #+END_SRC
 
@@ -109,7 +117,7 @@ Queue the message:
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
 (bt:with-lock-held (*queue-lock*)
   (when (<= level livello)
-    (push (list livello (get-internal-real-time) message) *tobe-printed*)))))
+    (push (list livello (ms(get-internal-real-time)) message) *tobe-printed*)))))
 #+END_SRC
 
 It is better, though, to =(start)= not from the =log= function; in this case we can provide arguments: log directory and file name
@@ -126,8 +134,10 @@ It is better, though, to =(start)= not from the =log= function; in this case we 
 	 (format t "refuse to start because ~a does not exist, please create it~%" dir)
 #+END_SRC
 
+=(get-universal-time)= is measured in seconds, while units of =(get-internal-real-time)= are not fixed,
+so I use function =ms= to transform them to milliseconds:
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
-(setf *start-time* (cons (* internal-time-units-per-second (get-universal-time)) (get-internal-real-time))
+(setf *start-time* (cons (get-universal-time) (ms(get-internal-real-time)))
       *print-timer* (sb-ext:make-timer #'printer :thread t))
 (sb-ext:schedule-timer *print-timer* 1 :repeat-interval 1) t)))
 #+END_SRC
@@ -149,12 +159,12 @@ Somehow the effect of =(declaim (optimize (speed 3) (safety 0)))= here is infini
 In order to distinguish messages comming from different sources (for example, different services running on the lisp server)
 let us define different log functions (=log-SLU= and =log-SLD= in this example), each adding its unique prefix to every log message:
 #+BEGIN_SRC lisp :tangle generated/example.lisp
-(defun log-SLU (type &rest message)
+(defun log-SLU (log-type &rest message)
   (apply #'SL:log
-    (cons type (cons (concat "SLU " (car message)) (cdr message)))))
-(defun log-SLD (type &rest message)
+    (cons log-type (cons (concat "SLU " (car message)) (cdr message)))))
+(defun log-SLD (log-type &rest message)
   (apply #'SL:log
-    (cons type (cons (concat "SLD " (car message)) (cdr message)))))
+    (cons log-type (cons (concat "SLD " (car message)) (cdr message)))))
 #+END_SRC
 
 =(main)= will be automatically evaluated when launching =example.bin=, but in interpreting mode it should be called manually, see the ~Makefile~:

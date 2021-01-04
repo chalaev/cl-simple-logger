@@ -11,9 +11,6 @@ Examples of other CL log systems: [[https://github.com/7max/log4cl][log4cl]], [[
 * Prerequisites
 It is assumed that [[https://www.quicklisp.org/beta/][quicklisp]] is installed; [[https://www.gnu.org/software/emacs/][emacs]] would help although it is not compulsory.
 
-Unpack [[https://github.com/chalaev/lisp-goodies/blob/master/generated/cl-package.tbz][simple-log.tbz]] into the local quicklisp directory:\\
-=tar xjfv simple-log.tbz --directory=$HOME/quicklisp/local-projects/=
-
 * Quick start
 Configure the log system before launching the log:
 ** Create log directory
@@ -27,7 +24,7 @@ chmod 770 /var/log/sbcl
 where ~shalaev~ should be replaced with your user name.
 
 ** Install the package
-Unpack [[file:generated/cl-package.tbz][simple-log.tbz]] into your [[https://www.quicklisp.org/beta/][Quicklisp]] directory:\\
+Unpack [[file:packaged/simple-log.tbz][simple-log.tbz]] into your [[https://www.quicklisp.org/beta/][Quicklisp]] directory:\\
 =tar xjfv simple-log.tbz --directory=$HOME/quicklisp/local-projects/=
 
 ** Test in an SBCL session
@@ -59,9 +56,9 @@ Notes:
 2. [[file:simple-log.org][simple-log.org]] contains the code from =generated/*= together with explanations.
 3. [[file:Makefile][Makefile]] is needed to test the changes made to the code; it
    1. uses ~emacs~ to generate the source code from the ~.org~ file,
-   2. launches [[file:generated/example.lisp][generated/example.lisp]] in interpreting mode, and
-   3. compiles [[file:generated/example.lisp][generated/example.lisp]] into ~generated/example.bin~.
-   4. creates [[file:simple-log.tbz][simple-log.tbz]]
+   2. launches [[file:generated/example.lisp][example.lisp]] in interpreting mode, and
+   3. compiles [[file:generated/example.lisp][example.lisp]] into ~generated/example.bin~.
+   4. creates [[file:packaged/simple-log.tbz][simple-log.tbz]]
 4. [[file:other-CLs.org][other-CLs.org]] contains a note about making the code compatible with other CL dialects. (This does not seem to be hard.)
 5. [[file:helpers/][helpers/*]] assist compilation.
 

@@ -1,21 +1,21 @@
 
 # Table of Contents
 
-1.  [The scope](#orgb556922)
-2.  [Prerequisites](#orgb3f45c7)
-3.  [Quick start](#org1730983)
-    1.  [Create log directory](#org250d8f5)
-    2.  [Install the package](#org3fe4348)
-    3.  [Test in an SBCL session](#orgd07dd64)
-4.  [Packaging, compiling and testing](#orgaa05241)
-5.  [Files](#orgd7f1023)
-6.  [License](#org8ae03d0)
-7.  [Support](#org85648b9)
+1.  [The scope](#org75bd043)
+2.  [Prerequisites](#orga4e6b04)
+3.  [Quick start](#orgf7adbb9)
+    1.  [Create log directory](#orga927079)
+    2.  [Install the package](#org6361989)
+    3.  [Test in an SBCL session](#org3ca5752)
+4.  [Packaging, compiling and testing](#org42bb853)
+5.  [Files](#org84dabaa)
+6.  [License](#org16ed7ab)
+7.  [Support](#orgb55cad3)
 
-Simple logging system for Common Lisp; currently works only on [sbcl](http://www.sbcl.org/), see [other-CLs.org](other-CLs.md).
+Simple logging system for Common Lisp; currently works only on [sbcl](http://www.sbcl.org/), see [other-CLs.org](other-CLs.org).
 
 
-<a id="orgb556922"></a>
+<a id="org75bd043"></a>
 
 # The scope
 
@@ -27,24 +27,21 @@ Simple logging system for Common Lisp; currently works only on [sbcl](http://www
 Examples of other CL log systems: [log4cl](https://github.com/7max/log4cl), [cl-log](https://github.com/nicklevine/cl-log).
 
 
-<a id="orgb3f45c7"></a>
+<a id="orga4e6b04"></a>
 
 # Prerequisites
 
 It is assumed that [quicklisp](https://www.quicklisp.org/beta/) is installed; [emacs](https://www.gnu.org/software/emacs/) would help although it is not compulsory.
 
-Unpack [simple-log.tbz](https://github.com/chalaev/lisp-goodies/blob/master/generated/cl-package.tbz) into the local quicklisp directory:  
-`tar xjfv simple-log.tbz --directory=$HOME/quicklisp/local-projects/`
 
-
-<a id="org1730983"></a>
+<a id="orgf7adbb9"></a>
 
 # Quick start
 
 Configure the log system before launching the log:
 
 
-<a id="org250d8f5"></a>
+<a id="orga927079"></a>
 
 ## Create log directory
 
@@ -58,22 +55,22 @@ Under root privileges:
 where `shalaev` should be replaced with your user name.
 
 
-<a id="org3fe4348"></a>
+<a id="org6361989"></a>
 
 ## Install the package
 
-Unpack [simple-log.tbz](generated/cl-package.tbz) into your [Quicklisp](https://www.quicklisp.org/beta/) directory:  
+Unpack [simple-log.tbz](packaged/simple-log.tbz) into your [Quicklisp](https://www.quicklisp.org/beta/) directory:  
 `tar xjfv simple-log.tbz --directory=$HOME/quicklisp/local-projects/`
 
 
-<a id="orgd07dd64"></a>
+<a id="org3ca5752"></a>
 
 ## Test in an SBCL session
 
 Open [quick-start.lisp](quick-start.lisp) and evaluate it in an interactive SBCL session.
 
 
-<a id="orgaa05241"></a>
+<a id="org42bb853"></a>
 
 # Packaging, compiling and testing
 
@@ -95,36 +92,35 @@ The compiled binary can be found in the [generated/](generated/) directory.
 Notes:
 
 1.  [Makefile](Makefile) requires
-    1.  [emacs](https://www.gnu.org/software/emacs/) for generating the source code files in the  [generated/](generated/) directory from [simple-log.org](simple-log.md) with the `M-x org-babel-tangle` command, and
+    1.  [emacs](https://www.gnu.org/software/emacs/) for generating the source code files in the  [generated/](generated/) directory from [simple-log.org](simple-log.org) with the `M-x org-babel-tangle` command, and
     2.  `printangle` function defined in [lisp-goodies/dot.emacs](https://github.com/chalaev/lisp-goodies/blob/master/generated/dot.emacs) file.
 2.  Unless you have manually compiled [sbcl](http://www.sbcl.org/) with `sh make.sh --with-sb-core-compression` command,
     the resulting binary will be several times larger than 13mb.
 
 
-<a id="orgd7f1023"></a>
+<a id="org84dabaa"></a>
 
 # Files
 
-1.  [README.org](README.md) generates `README.md` for [notabug](https://notabug.org/shalaev/cl-simple-logger) and [github](https://github.com/chalaev/cl-simple-logger).
-2.  [simple-log.org](simple-log.md) contains the code from `generated/*` together with explanations.
-3.  [macros.lisp](goodies/macros.lisp) is copied from the [lisp-goodies](https://notabug.org/shalaev/lisp-goodies) project.
-4.  [Makefile](Makefile) is needed to test the changes made to the code; it
+1.  [README.org](README.org) generates `README.md` for [notabug](https://notabug.org/shalaev/cl-simple-logger) and [github](https://github.com/chalaev/cl-simple-logger).
+2.  [simple-log.org](simple-log.org) contains the code from `generated/*` together with explanations.
+3.  [Makefile](Makefile) is needed to test the changes made to the code; it
     1.  uses `emacs` to generate the source code from the `.org` file,
-    2.  launches [generated/example.lisp](generated/example.lisp) in interpreting mode, and
-    3.  compiles [generated/example.lisp](generated/example.lisp) into `generated/example.bin`.
-    4.  creates [simple-log.tbz](simple-log.tbz)
-5.  [other-CLs.org](other-CLs.md) contains a note about making the code compatible with other CL dialects. (This does not seem to be hard.)
-6.  [helpers/\*](helpers/) assist compilation.
+    2.  launches [example.lisp](generated/example.lisp) in interpreting mode, and
+    3.  compiles [example.lisp](generated/example.lisp) into `generated/example.bin`.
+    4.  creates [simple-log.tbz](packaged/simple-log.tbz)
+4.  [other-CLs.org](other-CLs.org) contains a note about making the code compatible with other CL dialects. (This does not seem to be hard.)
+5.  [helpers/\*](helpers/) assist compilation.
 
 
-<a id="org8ae03d0"></a>
+<a id="org16ed7ab"></a>
 
 # License
 
 This code is released under [MIT license](https://mit-license.org/).
 
 
-<a id="org85648b9"></a>
+<a id="orgb55cad3"></a>
 
 # Support
 

@@ -1,0 +1,48 @@
+This is SBCL 2.0.10, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+; compiling file "/home/shalaev/quicklisp/local-projects/simple-log/simple-log.lisp" (written 04 JAN 2021 02:20:57 PM):
+; processing (DEFPACKAGE :SIMPLE-LOG ...)
+; processing (IN-PACKAGE :SIMPLE-LOG)
+; processing (DEFVAR LOG-TYPES ...)
+; processing (LOOP FOR ...)
+; processing (DECLAIM (TYPE # ...))
+; processing (DEFVAR *MAXLOGLEVEL* ...)
+; processing (DEFVAR LEVEL ...)
+; processing (LET (#) ...)
+; processing (DEFVAR OUT-STREAMS ...)
+; processing (DEFVAR DIR ...)
+; processing (DEFVAR LOG-FILE ...)
+; processing (DECLAIM (TYPE # ...))
+; processing (DEFVAR *START-TIME* ...)
+; processing (DEFVAR *QUEUE-LOCK* ...)
+; processing (DEFVAR *TOBE-PRINTED* ...)
+; processing (DEFVAR *PRINT-TIMER* ...)
+; processing (DEFUN FORMAT-MSG ...)
+; processing (DEFUN PRINTER ...)
+; processing (DEFUN LOG ...)
+; processing (DEFVAR DEFAULT-LOG-DIR ...)
+; processing (DEFUN START ...)
+; processing (DEFUN STOP ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.0.10-linux-x64/home/shalaev/quicklisp/local-projects/simple-log/simple-log-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.016
+; compiling file "/home/shalaev/quicklisp/local-projects/simple-log/tests.lisp" (written 04 JAN 2021 02:20:57 PM):
+; processing (DEFPACKAGE :SIMPLE-LOG/TESTS ...)
+; processing (IN-PACKAGE :SIMPLE-LOG/TESTS)
+; processing (DEFVAR N-FAILED ...)
+; processing (DEFUN RUN-TESTS ...)
+; processing (DEFTEST FORMAT-MSG.1 ...)
+
+; wrote /home/shalaev/.cache/common-lisp/sbcl-2.0.10-linux-x64/home/shalaev/quicklisp/local-projects/simple-log/tests-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.004
+Doing 1 pending test of 1 tests total.
+ SIMPLE-LOG/TESTS::FORMAT-MSG.1
+No tests failed.
+Doing 1 pending test of 1 tests total.
+ SIMPLE-LOG/TESTS::FORMAT-MSG.1
+No tests failed.

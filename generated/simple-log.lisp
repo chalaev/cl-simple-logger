@@ -4,22 +4,25 @@
 (defvar *maxLogLevel* (1- (length log-types)))
 (defvar level 0 "default (minimal) value")
 
+(let((ms(/ internal-time-units-per-second 1000)))
+(defun ms(internal-real-time)
+  (round(/ internal-real-time ms))))
+
 (defvar out-streams nil "list of auxillary streams for extra log copies")
 (defvar dir nil "directory where log files will be stored")
 (defvar log-file nil "log file name, required before we load the package")
 (declaim (type (integer) *maxLogLevel* level))
-(defvar *start-time* nil "needed to figure out the timing")
-(defvar *queue-lock* (bt:make-lock) "we need locks when running on multi-threading systems")
-(defvar *tobe-printed* nil "log buffer")
+(defvar *start-time* nil)
+(defvar *queue-lock* (bt:make-lock) "we need locks on multi-threading systems")
+(defvar *tobe-printed* nil "log messages buffer")
 
 (defvar *print-timer* nil "needed for flushing the log every second")
 
 (defun format-msg(stream msg &optional (ST *start-time*))
-(let ((dt (- (second msg) (cdr ST))))
-(declare (integer dt))
-  (multiple-value-bind (s fractions) (floor (+ (car ST) dt) internal-time-units-per-second)
-    (let ((ms (floor fractions (floor internal-time-units-per-second 1000))))
-    (multiple-value-bind (s mi h d mo) (decode-universal-time s)
+;; (declare (integer s))
+(multiple-value-bind (s ms) (floor (- (cadr msg) (cdr ST)) 1000)
+
+(multiple-value-bind (s mi h d mo) (decode-universal-time (+ (car ST) s))
 (loop for str in (cons stream out-streams) do
 
 (let ((message (third msg)))
@@ -31,7 +34,7 @@
 mo  d  h mi s ms
 (nth (first msg) log-types)); e.g., INFO
 (cdr message))))
-(format str "~%")))))))
+(format str "~%")))))
 
 (defun printer()
 "flushes the log buffer"
@@ -48,7 +51,7 @@ mo  d  h mi s ms
 
 (bt:with-lock-held (*queue-lock*)
   (when (<= level livello)
-    (push (list livello (get-internal-real-time) message) *tobe-printed*)))))
+    (push (list livello (ms(get-internal-real-time)) message) *tobe-printed*)))))
 
 (defvar default-log-dir (find-if #'uiop:directory-exists-p '("/var/log/sbcl/" "/tmp/")))
 (defun start(&optional dir FN)
@@ -60,7 +63,7 @@ mo  d  h mi s ms
     (ifn (uiop:directory-exists-p dir)
 	 (format t "refuse to start because ~a does not exist, please create it~%" dir)
 
-(setf *start-time* (cons (* internal-time-units-per-second (get-universal-time)) (get-internal-real-time))
+(setf *start-time* (cons (get-universal-time) (ms(get-internal-real-time)))
       *print-timer* (sb-ext:make-timer #'printer :thread t))
 (sb-ext:schedule-timer *print-timer* 1 :repeat-interval 1) t)))
 

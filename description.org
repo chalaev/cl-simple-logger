@@ -1,5 +1,4 @@
 This is a logging system designed
-- to run on server
-- in multithreading environment,
+- to run on a web server in multi-threading environment,
 - to simultaneously receive and process log messages from multiple independent services, and
-- to be as simple and robust as a hammer: I do not ever want to suspect that any bugs in my code might be connected with the logging system!
+- to be as simple and robust as a hammer: I do not ever want to suspect that any bugs in my code might be connected with the logging system.

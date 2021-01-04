@@ -3,6 +3,13 @@ Change log for [[https://github.com/chalaev/cl-simple-logger][cl-simple-logger]]
 * Lazy development
 Because of its simplicity this code does not have many bugs to be fixed or new ideas to be implemented.
 
+** Optimization 
+due to updates of [[https://github.com/chalaev/lisp-goodies][lisp-goodies package]].
+*** 01/04
+1. added ~generated/*log~ files
+2. now using milliseconds instead of non-universal =internal-time-units-per-second=.
+3. fixed testing on older SBCL versions (where =internal-time-units-per-second= is 1000).
+
 ** Packaged and compiled
 I think that this code is virtually bug free and stable (no major changes expected) now.
 
