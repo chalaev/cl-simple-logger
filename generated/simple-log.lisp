@@ -39,7 +39,7 @@ mo  d  h mi s ms
 (defun printer()
 "flushes the log buffer"
 (when *tobe-printed* (bt:with-lock-held (*queue-lock*)
-(with-open-file (s log-file :direction :output :if-exists :append)
+(with-open-file(s log-file :direction :output :if-exists :append :if-does-not-exist :create)
   (mapcar #'(lambda(msg) (format-msg s msg)) (reverse *tobe-printed*))
   (setf *tobe-printed* nil)))))
 

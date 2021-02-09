@@ -3,6 +3,10 @@ Change log for [[https://github.com/chalaev/cl-simple-logger][cl-simple-logger]]
 * Lazy development
 Because of its simplicity this code does not have many bugs to be fixed or new ideas to be implemented.
 
+** bug fixes
+*** 02/09
+fixed a bug: failed when there was no log file
+
 ** Optimization 
 due to updates of [[https://github.com/chalaev/lisp-goodies][lisp-goodies package]].
 *** 01/04

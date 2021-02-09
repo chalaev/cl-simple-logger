@@ -26,7 +26,7 @@ packaged/simple-log.tbz: quicklisp packaged/
 	@echo "Testing before we package it:"
 	$(SBCL) --eval "(asdf:operate 'asdf:test-op :simple-log)" --eval "(uiop:quit simple-log/tests:N-failed)" 2> generated/simple-log.bin.2.log > generated/simple-log.bin.1.log
 	@echo "\n\n`date '+%m/%d %H:%M'` ALL TESTS PASSED :)\n"
-	tar jcfv $@ --directory=$(quicklispDir)/..  simple-log
+	tar jcfv $@ --directory=$(quicklispDir)/..  --exclude=example.bin simple-log
 	-@chgrp tmp $@ generated/simple-log.bin.?.log
 
 $(quicklispDir)/%.lisp: generated/from/simple-log.org generated/from/packaging.org
@@ -53,6 +53,7 @@ README.md: README.org
 	-@chmod a-x $@
 
 clean:
+	echo "asdf:clear-system forces recompilation of a previously loaded system"
 	-$(SBCL) --quit --eval '(progn (asdf:clear-system :simple-log) (asdf:clear-system :simple-log/example)  (asdf:clear-system :simple-log/tests))'
 	-rm -r $(quicklispDir) generated version.org
 

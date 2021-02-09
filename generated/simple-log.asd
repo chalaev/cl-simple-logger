@@ -7,6 +7,8 @@
   :author "Oleg Shalaev"
   :mailto "oleg@chalaev.com"
   :licence "MIT"
+  :source-control (:git "https://github.com/chalaev/cl-simple-logger.git")
+  :bug-tracker "https://github.com/chalaev/cl-simple-logger/issues"
   :version (:read-file-line "version.org")
   :depends-on (:bordeaux-threads :local-time :uiop :shalaev/macros)
   :components ((:file "simple-log"))
