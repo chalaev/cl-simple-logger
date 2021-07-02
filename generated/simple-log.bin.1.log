@@ -5,13 +5,16 @@ SBCL is free software, provided as is, with absolutely no warranty.
 It is mostly in the public domain; some portions are provided under
 BSD-style licenses.  See the CREDITS and COPYING files in the
 distribution for more information.
-; compiling file "/home/shalaev/quicklisp/local-projects/simple-log/simple-log.lisp" (written 09 FEB 2021 05:31:47 PM):
+; compiling file "/home/shalaev/quicklisp/local-projects/simple-log/simple-log.lisp" (written 02 JUL 2021 11:04:25 AM):
 ; processing (DEFPACKAGE :SIMPLE-LOG ...)
 ; processing (IN-PACKAGE :SIMPLE-LOG)
 ; processing (DEFVAR LOG-TYPES ...)
-; processing (LOOP FOR ...)
-; processing (DECLAIM (TYPE # ...))
 ; processing (DEFVAR *MAXLOGLEVEL* ...)
+; processing (DEFVAR DEBUG ...)
+; processing (DEFVAR INFO ...)
+; processing (DEFVAR WARNING ...)
+; processing (DEFVAR ERROR ...)
+; processing (DECLAIM (TYPE # ...))
 ; processing (DEFVAR LEVEL ...)
 ; processing (LET (#) ...)
 ; processing (DEFVAR OUT-STREAMS ...)
@@ -31,7 +34,7 @@ distribution for more information.
 
 ; wrote /home/shalaev/.cache/common-lisp/sbcl-2.1.0-linux-x64/home/shalaev/quicklisp/local-projects/simple-log/simple-log-tmpGHU3ALSV.fasl
 ; compilation finished in 0:00:00.016
-; compiling file "/home/shalaev/quicklisp/local-projects/simple-log/tests.lisp" (written 09 FEB 2021 05:31:47 PM):
+; compiling file "/home/shalaev/quicklisp/local-projects/simple-log/tests.lisp" (written 02 JUL 2021 11:04:25 AM):
 ; processing (DEFPACKAGE :SIMPLE-LOG/TESTS ...)
 ; processing (IN-PACKAGE :SIMPLE-LOG/TESTS)
 ; processing (DEFVAR N-FAILED ...)

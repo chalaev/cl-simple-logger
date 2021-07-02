@@ -4,6 +4,13 @@ Change log for [[https://github.com/chalaev/cl-simple-logger][cl-simple-logger]]
 Because of its simplicity this code does not have many bugs to be fixed or new ideas to be implemented.
 
 ** bug fixes
+*** 07/01
+1. got rid of =eval-when=; now using emacs-lisp to generate message type IDs. 
+
+*** 02/17
+1. abrupt version change due to updated [[file:helpers/derive-version.el][derive-version.el]]
+2. removed  =helpers/derive-version.el=
+
 *** 02/09
 fixed a bug: failed when there was no log file
 

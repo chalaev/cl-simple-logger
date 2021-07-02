@@ -1,7 +1,13 @@
-(defvar log-types (list 'debug 'info 'warning 'error))
-(loop for field-name in log-types for i from 0 do (set field-name i))
-(declaim (type (integer) *maxLogLevel* level))
-(defvar *maxLogLevel* (1- (length log-types)))
+(progn
+  (defvar log-types
+    '("debug" "info" "warning" "error"))
+  (defvar *maxLogLevel* 3)
+  (defvar debug 0)
+  (defvar info 1)
+  (defvar warning 2)
+  (defvar error 3))
+
+(declaim (type (integer) *maxLogLevel*))
 (defvar level 0 "default (minimal) value")
 
 (let((ms(/ internal-time-units-per-second 1000)))
@@ -29,10 +35,10 @@
   (apply #'format (append (list str
 
 (concat
-"~&~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d.~3,'0d ~a " (car message))
+"~&~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d.~3,'0d ~:@(~a~) " (car message))
 
 mo  d  h mi s ms
-(nth (first msg) log-types)); e.g., INFO
+(nth (car msg) log-types)); e.g., INFO
 (cdr message))))
 (format str "~%")))))
 

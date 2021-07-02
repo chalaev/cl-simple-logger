@@ -1,21 +1,20 @@
 
 # Table of Contents
 
-1.  [The scope](#org75bd043)
-2.  [Prerequisites](#orga4e6b04)
-3.  [Quick start](#orgf7adbb9)
-    1.  [Create log directory](#orga927079)
-    2.  [Install the package](#org6361989)
-    3.  [Test in an SBCL session](#org3ca5752)
-4.  [Packaging, compiling and testing](#org42bb853)
-5.  [Files](#org84dabaa)
-6.  [License](#org16ed7ab)
-7.  [Support](#orgb55cad3)
+1.  [The scope](#orgd981c6a)
+2.  [Prerequisites](#orgc73bb77)
+3.  [Quick start](#orgcf9efec)
+    1.  [Create log directory](#org04fce78)
+    2.  [Install the package](#orgbfe5bf4)
+    3.  [Test in an SBCL session](#orgefc5da1)
+4.  [Packaging, compiling and testing](#org1e10d4d)
+5.  [Files](#org1ba888e)
+6.  [License](#org475ef90)
 
 Simple logging system for Common Lisp; currently works only on [sbcl](http://www.sbcl.org/), see [other-CLs.org](other-CLs.org).
 
 
-<a id="org75bd043"></a>
+<a id="orgd981c6a"></a>
 
 # The scope
 
@@ -27,21 +26,21 @@ Simple logging system for Common Lisp; currently works only on [sbcl](http://www
 Examples of other CL log systems: [log4cl](https://github.com/7max/log4cl), [cl-log](https://github.com/nicklevine/cl-log).
 
 
-<a id="orga4e6b04"></a>
+<a id="orgc73bb77"></a>
 
 # Prerequisites
 
 It is assumed that [quicklisp](https://www.quicklisp.org/beta/) is installed; [emacs](https://www.gnu.org/software/emacs/) would help although it is not compulsory.
 
 
-<a id="orgf7adbb9"></a>
+<a id="orgcf9efec"></a>
 
 # Quick start
 
 Configure the log system before launching the log:
 
 
-<a id="orga927079"></a>
+<a id="org04fce78"></a>
 
 ## Create log directory
 
@@ -55,7 +54,7 @@ Under root privileges:
 where `shalaev` should be replaced with your user name.
 
 
-<a id="org6361989"></a>
+<a id="orgbfe5bf4"></a>
 
 ## Install the package
 
@@ -63,14 +62,14 @@ Unpack [simple-log.tbz](packaged/simple-log.tbz) into your [Quicklisp](https://w
 `tar xjfv simple-log.tbz --directory=$HOME/quicklisp/local-projects/`
 
 
-<a id="org3ca5752"></a>
+<a id="orgefc5da1"></a>
 
 ## Test in an SBCL session
 
 Open [quick-start.lisp](quick-start.lisp) and evaluate it in an interactive SBCL session.
 
 
-<a id="org42bb853"></a>
+<a id="org1e10d4d"></a>
 
 # Packaging, compiling and testing
 
@@ -98,7 +97,7 @@ Notes:
     the resulting binary will be several times larger than 13mb.
 
 
-<a id="org84dabaa"></a>
+<a id="org1ba888e"></a>
 
 # Files
 
@@ -113,19 +112,9 @@ Notes:
 5.  [helpers/\*](helpers/) assist compilation.
 
 
-<a id="org16ed7ab"></a>
+<a id="org475ef90"></a>
 
 # License
 
 This code is released under [MIT license](https://mit-license.org/).
-
-
-<a id="orgb55cad3"></a>
-
-# Support
-
-You can support this project by sending
-
-1.  comments/questions to [oleg@chalaev.com](mailto:oleg@chalaev.com) and
-2.  donations via [liberapay](https://liberapay.com/shalaev/donate) or [paypal](https://www.paypal.com/paypalme/chalaev).
 

@@ -1,20 +1,55 @@
+-*- eval: (run-init-block) -*-
+
 #+TITLE: simple logging system for a lisp server
 #+AUTHOR: Oleg Shalaev
 #+EMAIL:  oleg@chalaev.com
 #+LaTeX_HEADER: \usepackage[russian,english]{babel}
 #+LATEX_HEADER: \usepackage[letterpaper,hmargin={1.5cm,1.5cm},vmargin={1.3cm,2cm},nohead,nofoot]{geometry}
 
+#+NAME: init
+#+BEGIN_SRC emacs-lisp :results output none
+(setf eval-on-save (push-new eval-on-save "constBlock"))
+#+END_SRC
+
 * Main code
 ** Variables
-Let us assign a number to every message type:
+
+Every element of ~file-DB~ (see next code block) is a vector having the following fields:
+#+NAME: messageTypes
+| field   | num ID | description |
+|---------+--------+-------------|
+| debug   |      0 |             |
+| info    |      1 |             |
+| warning |      2 |             |
+| error   |      3 |             |
+#+TBLFM: $2=@#-2
+←  the least informative level is 3 (only error messages), and the most informative one is 0 (everything is logged).
+
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
-(defvar log-types (list 'debug 'info 'warning 'error))
-(loop for field-name in log-types for i from 0 do (set field-name i))
-(declaim (type (integer) *maxLogLevel* level))
-(defvar *maxLogLevel* (1- (length log-types)))
+(declaim (type (integer) *maxLogLevel*))
 (defvar level 0 "default (minimal) value")
 #+END_SRC
-←  the least informative level is 3 (only error messages), and the most informative one is 0 (everything is logged).
+
+Let us assign a number to every message type:
+#+NAME: constBlock
+#+BEGIN_SRC emacs-lisp :var ffs=messageTypes :results value code :cache yes :results_switches ":tangle generated/simple-log.lisp :padline no"
+(cons 'progn (append(list
+`(defvar log-types (quote,(mapcar #'car ffs)))
+`(defvar *maxLogLevel* ,(1- (length ffs))))
+(mapcar #'(lambda(l)(list 'defvar (intern(car l)) (cadr l))) ffs)))
+#+END_SRC
+
+#+RESULTS[8292104402a1a159d1759b988179fad328b70f40]: constBlock
+#+BEGIN_SRC emacs-lisp :tangle generated/simple-log.lisp :padline no
+(progn
+  (defvar log-types
+    '("debug" "info" "warning" "error"))
+  (defvar *maxLogLevel* 3)
+  (defvar debug 0)
+  (defvar info 1)
+  (defvar warning 2)
+  (defvar error 3))
+#+END_SRC
 
 I want all my time variables to be measured in units of
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
@@ -64,12 +99,12 @@ Every log message will be printed with =timer= using =format-msg=:
 Using powerful (in CL) ~format~ abilities fot time output:
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
 (concat
-"~&~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d.~3,'0d ~a " (car message))
+"~&~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d.~3,'0d ~:@(~a~) " (car message))
 #+END_SRC
     11   /   09   20   :  07  :  02  .  348  ← time format under microscope
 #+BEGIN_SRC lisp :tangle generated/simple-log.lisp
 mo  d  h mi s ms
-(nth (first msg) log-types)); e.g., INFO
+(nth (car msg) log-types)); e.g., INFO
 (cdr message))))
 (format str "~%")))))
 #+END_SRC
